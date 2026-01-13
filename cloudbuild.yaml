@@ -75,12 +75,12 @@ steps:
           [[ "$$key" =~ ^[[:space:]]*# ]] && continue
           [[ -z "$$key" ]] && continue
           
-          # Remover espacios en blanco del inicio y fin
-          key=$$(echo "$$key" | xargs)
-          value=$$(echo "$$value" | xargs)
+          # Remover espacios en blanco del inicio y fin (sin usar xargs)
+          key=$$(echo -n "$$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$$//')
+          value=$$(echo -n "$$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$$//')
           
           # Remover comillas si existen
-          value=$$(echo "$$value" | sed -e 's/^"//' -e 's/"$$//' -e "s/^'//" -e "s/'$$//")
+          value=$$(echo -n "$$value" | sed -e 's/^"//' -e 's/"$$//' -e "s/^'//" -e "s/'$$//")
           
           if [ -n "$$key" ] && [ -n "$$value" ]; then
             ENV_ARGS+=("$${key}=$${value}")
@@ -91,9 +91,9 @@ steps:
         ENV_VARS_STRING=$$(IFS=','; echo "$${ENV_ARGS[*]}")
         
         # Deploy a Cloud Run con todas las variables de entorno
-        # Usar $$ para variables de bash, mantener ${} solo para Cloud Build substitutions
+        # PROJECT_ID y BUILD_ID son variables automáticas de Cloud Build, se expanden directamente
         gcloud run deploy ${_SERVICE_NAME} \
-          --image=${_REGION}-docker.pkg.dev/$$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$$BUILD_ID \
+          --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$BUILD_ID \
           --region=${_REGION} \
           --platform=managed \
           --allow-unauthenticated \
