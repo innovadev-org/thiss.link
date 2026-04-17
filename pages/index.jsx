@@ -50,7 +50,7 @@ export default function Home() {
 
   // !FUNCTIONS
   const generateSlug = async () => {
-    let slug = Monkey.slug(2);
+    let slug = Monkey.slug(1);
     return slug;
   };
 
